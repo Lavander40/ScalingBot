@@ -1,0 +1,148 @@
+package telegram
+
+import (
+	ep "scaling-bot/event_processor"
+	"scaling-bot/storage"
+	"errors"
+	"fmt"
+	"log"
+	"regexp"
+	"strings"
+	"time"
+)
+
+const (
+	StartCmd = "/start"
+	HelpCmd  = "/help"
+	TokenCmd = "/token"
+	AddCmd   = "/add"
+	RmCmd    = "/rm"
+	LimitCmd = "/limit"
+	GetLast  = "/last"
+)
+
+func (p *Processor) doCmd(text string, chatId int, userName string) error {
+	text = strings.TrimSpace(text)
+
+	log.Printf("run commant %s, by %s", text, userName)
+
+	switch text {
+	case StartCmd:
+		return p.tg.SendMessage(chatId, ep.Welcome_msg)
+	case HelpCmd:
+		return p.tg.SendMessage(chatId, ep.Help_msg)
+	case TokenCmd:
+		return p.tg.SendMessage(chatId, ep.No_amount)
+	}
+
+	credentials, err := p.storage.GetCred(chatId)
+	if isConfig(text) {
+		return p.scaler.CheckAuth(text, chatId)
+	}
+	if err != nil {
+		return p.tg.SendMessage(chatId, ep.Unidentified_msg)
+	}
+
+	// if isLimit(text) {
+	// 	return p.setLimit(text, credentials, userName)
+	// }
+	switch text {
+	case AddCmd:
+		return p.changeInstance(credentials, userName, 1)
+	case RmCmd:
+		return p.changeInstance(credentials, userName, -1)
+	case GetLast:
+		return p.getLast(credentials, 10)
+	case LimitCmd, TokenCmd:
+		return p.tg.SendMessage(chatId, ep.No_amount)
+	default:
+		return p.tg.SendMessage(chatId, ep.Unknown_msg)
+	}
+}
+
+func isConfig(text string) bool {
+	match, _ := regexp.MatchString("^/token [a-zA-Z0-9_-]+:t1.[A-Z0-9a-z_-]+[=]{0,2}.[A-Z0-9a-z_-]{86}[=]{0,2}$", text)
+	return match
+}
+
+func isLimit(text string) bool {
+	match, _ := regexp.MatchString("^/limit ?[0-9]+$", text)
+	return match
+}
+
+func (p *Processor) changeInstance(credentials storage.Credentials, userName string, amount int) error {
+	call := &storage.Action{
+		CloudId:    credentials.CloudId,
+		Type:      1,
+		Amount:    amount,
+		UserName:  userName,
+		CreatedAt: time.Now(),
+	}
+
+	if err := p.scaler.ApplyAction(credentials, *call); err != nil {
+		_ = p.tg.SendMessage(credentials.UserId, ep.Fail_msg)
+		return err
+	}
+
+	if err := p.storage.SaveAction(call); err != nil {
+		_ = p.tg.SendMessage(credentials.UserId, ep.Fail_msg)
+		return err
+	}
+
+	return p.tg.SendMessage(credentials.UserId, ep.Wait_msg)
+}
+
+// func (p *Processor) setLimit(text string, credentials storage.Credentials, userName string) error {
+// 	amount, _ := strconv.Atoi(text[strings.LastIndex(text, " ")+1:])
+// 	if amount < 1 || amount > 100 {
+// 		return p.tg.SendMessage(credentials.UserId, ep.Impossible_percent_msg)
+// 	}
+
+// 	call := &storage.Action{
+// 		CloudId:    credentials.CloudId,
+// 		Type:      2,
+// 		Amount:    amount,
+// 		UserName:  userName,
+// 		CreatedAt: time.Now(),
+// 	}
+
+// 	if err := p.ApplyLimit(credentials); err != nil {
+// 		_ = p.tg.SendMessage(credentials.UserId, unable_to_scale)
+// 		return e.WrapErr("can't apply call", err)
+// 	}
+
+// 	if err := p.storage.Save(call); err != nil {
+// 		_ = p.tg.SendMessage(credentials.UserId, fail_msg)
+// 		return e.WrapErr("can't run cmd /add", err)
+// 	}
+
+// 	return p.tg.SendMessage(credentials.UserId, sucess_msg)
+// }
+
+func (p *Processor) getLast(credentials storage.Credentials, amount int) error {
+	calls, err := p.storage.GetActions(credentials.CloudId, amount)
+	if errors.Is(err, storage.ErrEmpty) {
+		return p.tg.SendMessage(credentials.UserId, ep.No_found_msg)
+	}
+	if err != nil {
+		return err
+	}
+
+	var res string
+	for _, call := range calls {
+		switch call.Type {
+		case 1:
+			if call.Amount > 0 {
+				res += fmt.Sprintf("Был добавлен экземпляр приложения\nПользователь: %s\nВремя: %v\n\n", call.UserName, call.CreatedAt)
+			} else {
+				res += fmt.Sprintf("Был удалён экземпляр приложения\nПользователь: %s\nВремя: %v\n\n", call.UserName, call.CreatedAt)
+			}
+		case 2:
+			res += fmt.Sprintf("Установлен лимит загрузки ОЗУ (%%): %d\nПользователь: %s\nВремя: %v\n\n", call.Amount, call.UserName, call.CreatedAt)
+		default:
+			return storage.ErrUnknownType
+		}
+	}
+
+	return p.tg.SendMessage(credentials.UserId, res)
+}
