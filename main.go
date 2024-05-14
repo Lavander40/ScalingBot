@@ -29,11 +29,6 @@ func main() {
 		log.Fatalf("can't init storage: ", err)
 	}
 
-	server := server.NewServer()
-	if err := server.Start(); err != nil {
-		log.Fatal(err)
-	}
-
 	processor := tgprocessor.New(
 		tgclient.New(tgBotHost, mustToken()),
 		st,
@@ -43,6 +38,11 @@ func main() {
 	consumer := event_consumer.New(processor, processor, batchSize)
 	if err := consumer.Start(); err != nil {
 		log.Fatal("service is stopped", err)
+	}
+
+	server := server.NewServer()
+	if err := server.Start(); err != nil {
+		log.Fatal(err)
 	}
 }
 
