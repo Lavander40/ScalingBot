@@ -10,6 +10,7 @@ import (
 	"scaling-bot/scaler/yandex"
 	"scaling-bot/server"
 	"scaling-bot/storage/sqlite"
+	"sync"
 )
 
 const (
@@ -35,15 +36,27 @@ func main() {
 		yandex.New(),
 	)
 
-	consumer := event_consumer.New(processor, processor, batchSize)
-	if err := consumer.Start(); err != nil {
-		log.Fatal("service is stopped", err)
-	}
+	var wg sync.WaitGroup
 
-	server := server.NewServer()
-	if err := server.Start(); err != nil {
-		log.Fatal(err)
-	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		server := server.NewServer()
+		if err := server.Start(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		consumer := event_consumer.New(processor, processor, batchSize)
+		if err := consumer.Start(); err != nil {
+			log.Fatal("service is stopped", err)
+		}
+	}()
+
+	wg.Wait()
 }
 
 func mustToken() string {

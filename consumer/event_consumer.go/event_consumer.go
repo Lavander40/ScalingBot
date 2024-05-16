@@ -8,11 +8,11 @@ import (
 
 type Consumer struct {
 	fetcher   ep.Fetcher
-	processor ep.Pocessor
+	processor ep.Processor
 	batchSize int
 }
 
-func New(fetcher ep.Fetcher, processor ep.Pocessor, batchSize int) Consumer {
+func New(fetcher ep.Fetcher, processor ep.Processor, batchSize int) Consumer {
 	return Consumer{
 		fetcher:   fetcher,
 		processor: processor,
@@ -37,14 +37,11 @@ func (c *Consumer) Start() error {
 			log.Print(err)
 			continue
 		}
-
 	}
 }
 
 func (c *Consumer) handleEvents(events []ep.Event) error {
 	for _, event := range events {
-		//log.Printf("got new event: %s", event.Text)
-
 		if err := c.processor.Process(event); err != nil {
 			log.Printf("can't handle event %s", err.Error())
 			continue

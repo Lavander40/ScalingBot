@@ -17,6 +17,6 @@ type Fetcher interface {
 	Fetch(limit int) ([]Event, error)
 }
 
-type Pocessor interface {
+type Processor interface {
 	Process(e Event) error
 }

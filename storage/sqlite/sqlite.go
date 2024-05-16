@@ -26,7 +26,11 @@ func New(ctx context.Context, path string) (*Storage, error) {
 }
 
 func (s Storage) Init() error {
-	q := `CREATE TABLE IF NOT EXISTS calls (cloud_id INT, type INT, amount INT, user_name TEXT, created_at TIMESTAMP); CREATE TABLE IF NOT EXISTS credentials (user_id INT, api_token TEXT, cloud_id TEXT);`
+	q := `CREATE TABLE IF NOT EXISTS 
+	calls (cloud_id INT, type INT, amount INT, user_name TEXT, created_at TIMESTAMP);
+	CREATE TABLE IF NOT EXISTS 
+	credentials (user_id INT, api_token TEXT, cloud_id TEXT);`
+	
 	_, err := s.db.ExecContext(s.ctx, q)
 	if err != nil {
 		return err
