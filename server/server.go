@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-
-	"github.com/neo4j/neo4j-go-driver/v5/neo4j/log"
 )
 
 type Server struct {}
@@ -75,7 +74,7 @@ func HandleRequest(req []byte) {
 	var jsonReq CloudRequest
 	err := json.Unmarshal(req, &jsonReq)
 	if err != nil {
-		log.ERROR(err)
+		log.Fatal(err)
 	}
 	fmt.Println(jsonReq.Message)
 }
