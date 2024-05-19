@@ -64,6 +64,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 
 	if isAmount(text) {
 		amount, _ := strconv.Atoi(text[strings.LastIndex(text, " ")+1:])
+		if amount > 10 { amount = 10 }
 		res, err := p.getLast(credentials, amount)
 		if err != nil {
 			return p.tg.SendMessage(chatId, ep.Fail_msg)
