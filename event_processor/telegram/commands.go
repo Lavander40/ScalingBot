@@ -1,12 +1,13 @@
 package telegram
 
 import (
-	ep "scaling-bot/event_processor"
-	"scaling-bot/storage"
 	"errors"
 	"fmt"
 	"log"
 	"regexp"
+	ep "scaling-bot/event_processor"
+	"scaling-bot/storage"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -62,12 +63,10 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 	}
 
 	if isAmount(text) {
-		res, err := p.getLast(credentials, 10)
+		amount, _ := strconv.Atoi(text[strings.LastIndex(text, " ")+1:])
+		res, err := p.getLast(credentials, amount)
 		if err != nil {
 			return p.tg.SendMessage(chatId, ep.Fail_msg)
-		}
-		if len(res) == 0 {
-			return p.tg.SendMessage(chatId, ep.No_found_msg)
 		}
 		return p.tg.SendMessage(credentials.UserId, res)
 	}
@@ -82,7 +81,13 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 		return p.changeInstance(credentials, userName, 1)
 	case RmCmd:
 		return p.changeInstance(credentials, userName, -1)
-	case GetLast, LimitCmd, TokenCmd:
+	case GetLast:
+		res, err := p.getLast(credentials, 1)
+		if err != nil {
+			return p.tg.SendMessage(chatId, ep.Fail_msg)
+		}
+		return p.tg.SendMessage(chatId, res)
+	case LimitCmd, TokenCmd:
 		return p.tg.SendMessage(chatId, ep.No_amount)
 	default:
 		return p.tg.SendMessage(chatId, ep.Unknown_msg)
@@ -161,7 +166,7 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 func (p *Processor) getLast(credentials storage.Credentials, amount int) (string, error) {
 	calls, err := p.storage.GetActions(credentials.CloudId, amount)
 	if errors.Is(err, storage.ErrEmpty) {
-		return "", nil
+		return ep.No_found_msg, nil
 	}
 	if err != nil {
 		return "", err
