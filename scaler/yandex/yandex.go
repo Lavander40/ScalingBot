@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"scaling-bot/storage"
 	"strconv"
-	"strings"
 )
 
 type Scaler struct{}
