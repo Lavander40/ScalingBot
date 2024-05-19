@@ -85,6 +85,9 @@ func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Actio
 	if err != nil {
 		return err
 	}
+	if size == 1 && call.Amount == -1 {
+		return storage.ErrOutOfLimit
+	}
 
 	payload := `{
 		"updateMask": "scalePolicy.fixedScale",

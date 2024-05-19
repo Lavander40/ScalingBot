@@ -95,7 +95,7 @@ func isConfig(text string) bool {
 }
 
 func isAmount(text string) bool {
-	match, _ := regexp.MatchString("^/limit ?[0-9]+$", text)
+	match, _ := regexp.MatchString("^/last ?[0-9]+$", text)
 	return match
 }
 
@@ -113,7 +113,12 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 		CreatedAt: time.Now(),
 	}
 
-	if err := p.scaler.ApplyAction(credentials, *call); err != nil {
+	err := p.scaler.ApplyAction(credentials, *call)
+	if errors.Is(err, storage.ErrOutOfLimit) {
+		_ = p.tg.SendMessage(credentials.UserId, ep.Not_enough)
+		return err
+	}
+	if err != nil {
 		_ = p.tg.SendMessage(credentials.UserId, ep.Fail_msg)
 		return err
 	}
