@@ -26,6 +26,26 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 
 	log.Printf("run commant %s, by %s", text, userName)
 
+	if isConfig(text) {
+		conf := strings.Split(text[strings.LastIndex(text, " ") + 1 :], ":")
+
+		credentials := storage.Credentials{
+			UserId:   chatId,
+			CloudId:  conf[0],
+			AuthToken: "Bearer " + conf[1],
+		}
+
+		err := p.scaler.CheckAuth(credentials, chatId)
+		if err != nil {
+			return p.tg.SendMessage(chatId, "Подключение к облаку не установлено")
+		}
+		err = p.storage.SetCred(credentials)
+		if err != nil {
+			return err
+		}
+		return p.tg.SendMessage(chatId, ep.Sucess_msg)
+	}
+
 	switch text {
 	case StartCmd:
 		return p.tg.SendMessage(chatId, ep.Welcome_msg)
@@ -35,25 +55,34 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 		return p.tg.SendMessage(chatId, ep.No_amount)
 	}
 
+	// проверка на наличие даннвых подлключения к облаку
 	credentials, err := p.storage.GetCred(chatId)
-	if isConfig(text) {
-		return p.scaler.CheckAuth(text, chatId)
-	}
 	if err != nil {
 		return p.tg.SendMessage(chatId, ep.Unidentified_msg)
 	}
 
-	// if isLimit(text) {
-	// 	return p.setLimit(text, credentials, userName)
-	// }
+	if isAmount(text) {
+		res, err := p.getLast(credentials, 10)
+		if err != nil {
+			return p.tg.SendMessage(chatId, ep.Fail_msg)
+		}
+		if len(res) == 0 {
+			return p.tg.SendMessage(chatId, ep.No_found_msg)
+		}
+		return p.tg.SendMessage(credentials.UserId, res)
+	}
+
+	if isLimit(text) {
+		return p.tg.SendMessage(chatId, ep.Not_done)
+		//return p.setLimit(text, credentials, userName)
+	}
+
 	switch text {
 	case AddCmd:
 		return p.changeInstance(credentials, userName, 1)
 	case RmCmd:
 		return p.changeInstance(credentials, userName, -1)
-	case GetLast:
-		return p.getLast(credentials, 10)
-	case LimitCmd, TokenCmd:
+	case GetLast, LimitCmd, TokenCmd:
 		return p.tg.SendMessage(chatId, ep.No_amount)
 	default:
 		return p.tg.SendMessage(chatId, ep.Unknown_msg)
@@ -62,6 +91,11 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 
 func isConfig(text string) bool {
 	match, _ := regexp.MatchString("^/token [a-zA-Z0-9_-]+:t1.[A-Z0-9a-z_-]+[=]{0,2}.[A-Z0-9a-z_-]{86}[=]{0,2}$", text)
+	return match
+}
+
+func isAmount(text string) bool {
+	match, _ := regexp.MatchString("^/limit ?[0-9]+$", text)
 	return match
 }
 
@@ -119,13 +153,13 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 // 	return p.tg.SendMessage(credentials.UserId, sucess_msg)
 // }
 
-func (p *Processor) getLast(credentials storage.Credentials, amount int) error {
+func (p *Processor) getLast(credentials storage.Credentials, amount int) (string, error) {
 	calls, err := p.storage.GetActions(credentials.CloudId, amount)
 	if errors.Is(err, storage.ErrEmpty) {
-		return p.tg.SendMessage(credentials.UserId, ep.No_found_msg)
+		return "", nil
 	}
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var res string
@@ -140,9 +174,9 @@ func (p *Processor) getLast(credentials storage.Credentials, amount int) error {
 		case 2:
 			res += fmt.Sprintf("Установлен лимит загрузки ОЗУ (%%): %d\nПользователь: %s\nВремя: %v\n\n", call.Amount, call.UserName, call.CreatedAt)
 		default:
-			return storage.ErrUnknownType
+			return "", storage.ErrUnknownType
 		}
 	}
 
-	return p.tg.SendMessage(credentials.UserId, res)
+	return res, nil
 }

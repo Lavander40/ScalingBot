@@ -31,15 +31,7 @@ func New() *Scaler{
 	return &Scaler{}
 }
 
-func (s *Scaler) CheckAuth(text string, chatId int) error {
-	conf := strings.Split(text[strings.LastIndex(text, " ")+1:], ":")
-
-	credentials := storage.Credentials{
-		UserId:   chatId,
-		CloudId:  conf[0],
-		AuthToken: "Bearer " + conf[1],
-	}
-
+func (s *Scaler) CheckAuth(credentials storage.Credentials, chatId int) error {
 	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
 	if err != nil {
 		panic(err)
