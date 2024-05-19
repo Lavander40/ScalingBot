@@ -90,7 +90,7 @@ func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Actio
 	}
 
 	payload := `{
-		"updateMask": "scalePolicy.fixedScale",
+		"updateMask": "scalePolicy.fixedScale.size",
 		"scalePolicy": {
 			"fixedScale": {
 				"size": "` + strconv.Itoa(size + call.Amount) + `"
