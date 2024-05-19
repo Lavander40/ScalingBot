@@ -78,7 +78,7 @@ func (s Storage) GetActions(groupId string, amount int) ([]*storage.Action, erro
 }
 
 func (s Storage) SetCred(c storage.Credentials) error {
-	q := `INSERT OR IGNORE INTO credentials (cloud_id, api_token, group_id) VALUES (?, ?, ?); UPDATE credentials SET api_token = ?, cloud_id = ? WHERE user_id = ?`
+	q := `INSERT OR IGNORE INTO credentials (user_id, api_token, cloud_id) VALUES (?, ?, ?); UPDATE credentials SET api_token = ?, cloud_id = ? WHERE user_id = ?`
 
 	_, err := s.db.ExecContext(s.ctx, q, c.UserId, c.AuthToken, c.CloudId, c.AuthToken, c.CloudId, c.UserId)
 	if err != nil {
