@@ -63,8 +63,9 @@ func (s *Server) HandleRequest(req []byte) {
 	}
 
 	for _, user := range userList {
-		s.tg.SendMessage(user, fmt.Sprintf("Внимание облако %s перегружено, значение предела 50% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.A))
+		s.tg.SendMessage(user, fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Message, jsonReq.Title, jsonReq.Alerts[0].Values.A))
 	}
 
-	fmt.Printf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Message, jsonReq.Title, jsonReq.Alerts[0].Values.A)
+	fmt.Println(jsonReq.Message)
+	fmt.Printf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f\n", jsonReq.Message, jsonReq.Title, jsonReq.Alerts[0].Values.A)
 }
