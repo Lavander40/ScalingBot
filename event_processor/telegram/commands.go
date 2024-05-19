@@ -19,7 +19,8 @@ const (
 	AddCmd   = "/add"
 	RmCmd    = "/rm"
 	LimitCmd = "/limit"
-	GetLast  = "/last"
+	LastCmd  = "/last"
+	StatusCmd = "/status"
 )
 
 func (p *Processor) doCmd(text string, chatId int, userName string) error {
@@ -82,7 +83,9 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 		return p.changeInstance(credentials, userName, 1)
 	case RmCmd:
 		return p.changeInstance(credentials, userName, -1)
-	case GetLast:
+	case StatusCmd:
+		return p.tg.SendMessage(chatId, ep.Not_done)
+	case LastCmd:
 		res, err := p.getLast(credentials, 1)
 		if err != nil {
 			return p.tg.SendMessage(chatId, ep.Fail_msg)

@@ -20,6 +20,7 @@ type Storage interface {
 	GetActions(string, int) ([]*Action, error) // cloud_is, amount
 	SetCred(Credentials) error
 	GetCred(int) (Credentials, error) // user_id
+	GetUserByCloud(string) ([]int, error)
 }
 
 type Action struct {

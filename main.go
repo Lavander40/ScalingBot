@@ -25,13 +25,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't connect to storage: ", err)
 	}
-
 	if err := st.Init(); err != nil {
 		log.Fatalf("can't init storage: ", err)
 	}
 
+	tgClient := tgclient.New(tgBotHost, mustToken())
+
 	processor := tgprocessor.New(
-		tgclient.New(tgBotHost, mustToken()),
+		tgClient,
 		st,
 		yandex.New(),
 	)
@@ -41,7 +42,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		server := server.NewServer()
+		server := server.NewServer(st, tgClient)
 		if err := server.Start(); err != nil {
 			log.Fatal(err)
 		}

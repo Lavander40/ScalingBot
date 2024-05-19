@@ -102,3 +102,27 @@ func (s Storage) GetCred(chatId int) (storage.Credentials, error) {
 
 	return c, nil
 }
+
+func (s Storage) GetUserByCloud(cloudId string) ([]int, error) {
+	var users []int
+	q := `SELECT user_id FROM credentials WHERE cloud_id = ?`
+
+	rows, err := s.db.QueryContext(s.ctx, q, cloudId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user int
+		if err := rows.Scan(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
