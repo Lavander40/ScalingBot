@@ -59,7 +59,7 @@ func (s *Scaler) CheckAuth(credentials storage.Credentials, chatId int) error {
 func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
 	// set content-type header to JSON
@@ -69,7 +69,7 @@ func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	defer resp.Body.Close()
 
@@ -86,7 +86,7 @@ func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// set content-type header to JSON
@@ -96,7 +96,7 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	defer resp.Body.Close()
 

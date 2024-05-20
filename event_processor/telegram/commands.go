@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"google.golang.org/grpc/credentials"
 )
 
 const (
@@ -41,7 +39,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 
 		err := p.scaler.CheckAuth(credentials, chatId)
 		if err != nil {
-			return p.tg.SendMessage(chatId, "Подключение к облаку не установлено")
+			return p.tg.SendMessage(chatId, ep.No_connect)
 		}
 		err = p.storage.SetCred(credentials)
 		if err != nil {
@@ -142,8 +140,12 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 	return p.tg.SendMessage(credentials.UserId, ep.Wait_msg)
 }
 
-func (p *Processor) getStatus(credentials) error {
-
+func (p *Processor) getStatus(credentials storage.Credentials) error {
+	msg, err := p.scaler.GetStatus(credentials)
+	if err != nil {
+		msg = ep.No_connect
+	}
+	return p.tg.SendMessage(credentials.UserId, msg)
 }
 
 // func (p *Processor) setLimit(text string, credentials storage.Credentials, userName string) error {
