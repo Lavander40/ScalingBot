@@ -99,6 +99,7 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+	fmt.Printf("%+v\n", resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return "", err
 	}
@@ -107,8 +108,6 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
 		return "", err
 	}
-
-	fmt.Printf("%+v\n", target)
 
 	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nСостояние системы: %s\n", target.Name, target.ID, target.Status), nil
 }
