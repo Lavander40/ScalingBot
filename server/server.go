@@ -57,7 +57,6 @@ func (s *Server) HandleRequest(req []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%+v\n", jsonReq)
 
 	userList, err := s.storage.GetUserByCloud(jsonReq.Title)
 	if err != nil {
@@ -66,7 +65,6 @@ func (s *Server) HandleRequest(req []byte) {
 
 	for _, user := range userList {
 		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.A)
-		fmt.Println(user, msg)
 		s.tg.SendMessage(user, msg)
 	}
 }
