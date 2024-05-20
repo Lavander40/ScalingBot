@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/credentials"
 )
 
 const (
@@ -138,6 +140,10 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 	}
 
 	return p.tg.SendMessage(credentials.UserId, ep.Wait_msg)
+}
+
+func (p *Processor) getStatus(credentials) error {
+
 }
 
 // func (p *Processor) setLimit(text string, credentials storage.Credentials, userName string) error {

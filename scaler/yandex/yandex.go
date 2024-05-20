@@ -17,6 +17,9 @@ type GetResponse struct {
 			Size string `json:"size"`
 		} `json:"fixedScale"`
 	} `json:"scalePolicy"`
+	ClusterID       string    `json:"clusterId"`
+	Name            string    `json:"name"`
+	Status          string    `json:"status"`
 }
 
 type PatchResponse struct {
@@ -78,6 +81,31 @@ func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 	size, _ := strconv.Atoi(target.ScalePolicy.FixedScale.Size)
 
 	return size, nil
+}
+
+func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// set content-type header to JSON
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", credentials.AuthToken)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	var target GetResponse
+	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nСостояние системы: %s\n", target.Name, target.ClusterID, target.Status), nil
 }
 
 func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Action) error {
