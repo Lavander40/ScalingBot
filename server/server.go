@@ -63,7 +63,6 @@ func (s *Server) HandleRequest(req []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(userList)
 
 	for _, user := range userList {
 		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.A)
