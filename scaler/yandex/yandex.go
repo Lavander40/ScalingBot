@@ -12,33 +12,33 @@ import (
 type Scaler struct{}
 
 type GetResponse struct {
-	ScalePolicy struct{
-		FixedScale struct{
+	ScalePolicy struct {
+		FixedScale struct {
 			Size string `json:"size"`
 		} `json:"fixedScale"`
 	} `json:"scalePolicy"`
-	ClusterID       string    `json:"clusterId"`
-	Name            string    `json:"name"`
-	Status          string    `json:"status"`
+	ClusterID string `json:"clusterId"`
+	Name      string `json:"name"`
+	Status    string `json:"status"`
 }
 
 type PatchResponse struct {
 	Error struct {
-		Code    int `json:"code"`
+		Code    int    `json:"code"`
 		Message string `json:"message"`
 	} `json:"error"`
 }
 
-func New() *Scaler{
+func New() *Scaler {
 	return &Scaler{}
 }
 
 func (s *Scaler) CheckAuth(credentials storage.Credentials, chatId int) error {
-	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, nil)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", credentials.AuthToken)
 
@@ -57,7 +57,7 @@ func (s *Scaler) CheckAuth(credentials storage.Credentials, chatId int) error {
 }
 
 func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
-	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -84,7 +84,7 @@ func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 }
 
 func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
-	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, nil)
 	if err != nil {
 		return "", err
 	}
@@ -99,6 +99,9 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", err
+	}
 
 	var target GetResponse
 	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
@@ -121,12 +124,12 @@ func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Actio
 		"updateMask": "scalePolicy.fixedScale.size",
 		"scalePolicy": {
 			"fixedScale": {
-				"size": "` + strconv.Itoa(size + call.Amount) + `"
+				"size": "` + strconv.Itoa(size+call.Amount) + `"
 			}
 		}
 	}`
 
-	req, err := http.NewRequest("PATCH", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, bytes.NewBuffer([]byte(payload)))
+	req, err := http.NewRequest("PATCH", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		panic(err)
 	}
