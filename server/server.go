@@ -30,6 +30,7 @@ type CloudRequest struct {
 
 func NewServer(storage storage.Storage, client *telegram.Client) *Server {
 	return &Server{
+		tg: client,
 		storage: storage,
 	}
 }
@@ -42,7 +43,7 @@ func (s *Server) Start() (err error) {
 func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
     body, err := io.ReadAll(r.Body)
     if err != nil {
-        http.Error(w, "Failed to read request body", http.StatusBadRequest)
+        http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
     defer r.Body.Close()
