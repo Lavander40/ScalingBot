@@ -51,7 +51,7 @@ func (s Storage) SaveAction(a *storage.Action) error {
 }
 
 func (s Storage) GetActions(groupId string, amount int) ([]*storage.Action, error) {
-	q := `SELECT type, amount, user_name, created_at FROM calls WHERE cloud_id = ? ORDER BY created_at DESC LIMIT ?`
+	q := `SELECT type, amount, user_name, created_at FROM calls WHERE cloud_id = ? ORDER BY created_at ASC LIMIT ?`
 
 	rows, err := s.db.QueryContext(s.ctx, q, groupId, amount)
 	if err != nil {

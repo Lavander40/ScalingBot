@@ -17,9 +17,9 @@ type GetResponse struct {
 			Size string `json:"size"`
 		} `json:"fixedScale"`
 	} `json:"scalePolicy"`
-	ClusterID string `json:"clusterId"`
-	Name      string `json:"name"`
-	Status    string `json:"status"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
 }
 
 type PatchResponse struct {
@@ -57,7 +57,7 @@ func (s *Scaler) CheckAuth(credentials storage.Credentials, chatId int) error {
 }
 
 func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
-	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, nil)
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -84,7 +84,7 @@ func (s *Scaler) getAmount(credentials storage.Credentials) (int, error) {
 }
 
 func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
-	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, nil)
+	req, err := http.NewRequest("GET", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, nil)
 	if err != nil {
 		return "", err
 	}
@@ -108,7 +108,9 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nСостояние системы: %s\n", target.Name, target.ClusterID, target.Status), nil
+	fmt.Printf("%+v\n", target)
+
+	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nСостояние системы: %s\n", target.Name, target.ID, target.Status), nil
 }
 
 func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Action) error {
