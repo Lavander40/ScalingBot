@@ -99,7 +99,6 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	fmt.Printf("%+v\n", resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return "", err
 	}

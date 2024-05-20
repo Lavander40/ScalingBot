@@ -45,7 +45,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 		if err != nil {
 			return err
 		}
-		return p.tg.SendMessage(chatId, ep.Sucess_msg)
+		return p.tg.SendMessage(chatId, "Соединение успешно установлено")
 	}
 
 	switch text {
