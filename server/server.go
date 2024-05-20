@@ -56,6 +56,7 @@ func (s *Server) HandleRequest(req []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(jsonReq)
 
 	userList, err := s.storage.GetUserByCloud(jsonReq.Message)
 	if err != nil {
