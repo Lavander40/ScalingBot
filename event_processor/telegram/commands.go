@@ -84,7 +84,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 	case RmCmd:
 		return p.changeInstance(credentials, userName, -1)
 	case StatusCmd:
-		return p.tg.SendMessage(chatId, ep.Not_done)
+		return p.getStatus(credentials)
 	case LastCmd:
 		res, err := p.getLast(credentials, 1)
 		if err != nil {
