@@ -28,6 +28,10 @@ type CloudRequest struct {
 	Message         string `json:"message"`
 }
 
+type Response struct{
+	Limit float32
+}
+
 func NewServer(storage storage.Storage, client *telegram.Client) *Server {
 	return &Server{
 		tg: client,
@@ -36,7 +40,7 @@ func NewServer(storage storage.Storage, client *telegram.Client) *Server {
 }
 
 func (s *Server) Start() (err error) {
-	http.HandleFunc("/webhook", s.alertHandler)
+	http.HandleFunc("/", s.alertHandler)
     return http.ListenAndServe(":6060", nil)
 }
 
@@ -48,10 +52,23 @@ func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
     }
     defer r.Body.Close()
 
-    s.HandleRequest(body)
+	path := r.URL.Path
+	fmt.Println(path)
+
+	if path == "/webhook" {
+    	s.HandleWebhook(body)
+	}
+
+	if path == "/variables" {
+		limit := s.HandleVar(body)
+		resp := Response{
+			Limit: limit,
+		}
+		json.NewEncoder(w).Encode(resp)
+	}
 }
 
-func (s *Server) HandleRequest(req []byte) {
+func (s *Server) HandleWebhook(req []byte) {
 	var jsonReq CloudRequest
 	err := json.Unmarshal(req, &jsonReq)
 	if err != nil {
@@ -67,4 +84,8 @@ func (s *Server) HandleRequest(req []byte) {
 		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.A)
 		s.tg.SendMessage(user, msg)
 	}
+}
+
+func (s *Server) HandleVar(req []byte) float32 {
+	return 0.5
 }
