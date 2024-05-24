@@ -29,7 +29,7 @@ type CloudRequest struct {
 }
 
 type Response struct{
-	Limit float32
+	Limit float32 `json:"limit"`
 }
 
 func NewServer(storage storage.Storage, client *telegram.Client) *Server {
