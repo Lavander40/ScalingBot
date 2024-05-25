@@ -53,7 +53,6 @@ func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
 
 	path := r.URL.Path
-	fmt.Println(path)
 
 	if path == "/webhook" {
     	s.HandleWebhook(body)
@@ -74,6 +73,8 @@ func (s *Server) HandleWebhook(req []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(jsonReq)
 
 	userList, err := s.storage.GetUserByCloud(jsonReq.Title)
 	if err != nil {
