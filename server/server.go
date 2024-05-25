@@ -11,7 +11,7 @@ import (
 )
 
 type Server struct {
-	tg *telegram.Client
+	tg      *telegram.Client
 	storage storage.Storage
 }
 
@@ -19,44 +19,44 @@ type CloudRequest struct {
 	Receiver string `json:"receiver"`
 	Status   string `json:"status"`
 	Alerts   []struct {
-		Values       struct {
+		Values struct {
 			A float64 `json:"A"`
-			C int     `json:"C"`
+			D float32 `json:"C"`
 		} `json:"values"`
 	} `json:"alerts"`
-	Title           string `json:"title"`
-	Message         string `json:"message"`
+	Title   string `json:"title"`
+	Message string `json:"message"`
 }
 
-type Response struct{
+type Response struct {
 	Limit float32 `json:"limit"`
 }
 
 func NewServer(storage storage.Storage, client *telegram.Client) *Server {
 	return &Server{
-		tg: client,
+		tg:      client,
 		storage: storage,
 	}
 }
 
 func (s *Server) Start() (err error) {
 	http.HandleFunc("/", s.alertHandler)
-    return http.ListenAndServe(":6060", nil)
+	return http.ListenAndServe(":6060", nil)
 }
 
 func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
-    body, err := io.ReadAll(r.Body)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-    defer r.Body.Close()
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 
 	path := r.URL.Path
 	fmt.Println(string(body))
 
 	if path == "/webhook" {
-    	s.HandleWebhook(body)
+		s.HandleWebhook(body)
 	}
 
 	if path == "/variables" {
