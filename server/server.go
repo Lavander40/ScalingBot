@@ -20,8 +20,7 @@ type CloudRequest struct {
 	Status   string `json:"status"`
 	Alerts   []struct {
 		Values struct {
-			A float64 `json:"A"`
-			D float32 `json:"C"`
+			B float32 `json:"B0"`
 		} `json:"values"`
 	} `json:"alerts"`
 	Title   string `json:"title"`
@@ -81,7 +80,7 @@ func (s *Server) HandleWebhook(req []byte) {
 	}
 
 	for _, user := range userList {
-		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.A)
+		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.B * 100)
 		s.tg.SendMessage(user, msg)
 	}
 }
