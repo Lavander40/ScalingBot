@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"scaling-bot/client/telegram"
 	"scaling-bot/storage"
-	"strings"
 )
 
 type Server struct {
