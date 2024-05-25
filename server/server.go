@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"scaling-bot/client/telegram"
 	"scaling-bot/storage"
+	"strings"
 )
 
 type Server struct {
@@ -53,7 +54,7 @@ func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
 
 	path := r.URL.Path
-	fmt.Println(body)
+	fmt.Println(string(body))
 
 	if path == "/webhook" {
     	s.HandleWebhook(body)
