@@ -74,7 +74,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 	}
 
 	if isLimit(text) {
-		return p.tg.SendMessage(chatId, ep.Not_done)
+		return p.tg.SendMessage(chatId, ep.Sucess_msg)
 		//return p.setLimit(text, credentials, userName)
 	}
 

@@ -39,11 +39,12 @@ func NewServer(storage storage.Storage, client *telegram.Client) *Server {
 }
 
 func (s *Server) Start() (err error) {
-	http.HandleFunc("/", s.alertHandler)
+	http.HandleFunc("/webhook", s.HandleWebhook)
+	http.HandleFunc("/variables", s.HandleVar)
 	return http.ListenAndServe(":6060", nil)
 }
 
-func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -51,26 +52,8 @@ func (s *Server) alertHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	path := r.URL.Path
-	//fmt.Println(string(body))
-
-	if path == "/webhook" {
-		s.HandleWebhook(body)
-	}
-
-	if path == "/variables" {
-		limit := s.HandleVar(body)
-		resp := Response{
-			Limit: limit,
-		}
-		json.NewEncoder(w).Encode(resp)
-	}
-}
-
-func (s *Server) HandleWebhook(req []byte) {
 	var jsonReq CloudRequest
-	err := json.Unmarshal(req, &jsonReq)
-	if err != nil {
+	if err := json.Unmarshal(body, &jsonReq); err != nil {
 		log.Fatal(err)
 	}
 
@@ -85,6 +68,16 @@ func (s *Server) HandleWebhook(req []byte) {
 	}
 }
 
-func (s *Server) HandleVar(req []byte) float32 {
-	return 0.5
+func (s *Server) HandleVar(w http.ResponseWriter, r *http.Request) {
+// 	body, err := io.ReadAll(r.Body)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
+// 	defer r.Body.Close()
+
+	resp := Response{
+		Limit: 0.5,
+	}
+	json.NewEncoder(w).Encode(resp)
 }
