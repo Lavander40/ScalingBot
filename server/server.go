@@ -62,11 +62,18 @@ func (s *Server) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v", string(body))
+	if jsonReq.Status == "firing" {
+		for _, user := range userList {
+			msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.B * 100)
+			s.tg.SendMessage(user, msg)
+		}
+	}
 
-	for _, user := range userList {
-		msg := fmt.Sprintf("Внимание облако %s перегружено, значение предела %s%% преодолено, последнее значение метрики: %f", jsonReq.Title, jsonReq.Message, jsonReq.Alerts[0].Values.B * 100)
-		s.tg.SendMessage(user, msg)
+	if jsonReq.Status == "resolved" {
+		for _, user := range userList {
+			msg := fmt.Sprintf("Облако %s больше не нагружено, значение метрик находится ниже установленного предела %s%%", jsonReq.Title, jsonReq.Message)
+			s.tg.SendMessage(user, msg)
+		}
 	}
 }
 
