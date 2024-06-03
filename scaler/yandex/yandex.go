@@ -108,7 +108,7 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nСостояние системы: %s\n", target.Name, target.ID, target.Status), nil
+	return fmt.Sprintf("Подключение к облаку %s присутствует\nИдентификатор кластера: %s\nЧисло узлов в кластере: %s\nСостояние системы: %s\n", target.Name, target.ID, target.ScalePolicy.FixedScale.Size, target.Status), nil
 }
 
 func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Action) error {
