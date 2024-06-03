@@ -62,7 +62,7 @@ func (s *Server) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", string(body))	
+	//fmt.Printf("%+v\n", string(body))	
 
 	if jsonReq.Status == "firing" {
 		for _, user := range userList {
