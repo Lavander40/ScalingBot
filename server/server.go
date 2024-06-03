@@ -20,7 +20,7 @@ type CloudRequest struct {
 	Status   string `json:"status"`
 	Alerts   []struct {
 		Values struct {
-			B float32 `json:"B"`
+			B float32 `json:"B0"`
 		} `json:"values"`
 	} `json:"alerts"`
 	Title   string `json:"title"`
