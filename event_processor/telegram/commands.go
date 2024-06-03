@@ -143,7 +143,7 @@ func (p *Processor) changeInstance(credentials storage.Credentials, userName str
 func (p *Processor) getStatus(credentials storage.Credentials) error {
 	msg, err := p.scaler.GetStatus(credentials)
 	if err != nil {
-		msg = ep.No_connect
+		msg = "Связь с облаком не установлена, проверьте срок жизни токена"
 	}
 	return p.tg.SendMessage(credentials.UserId, msg)
 }

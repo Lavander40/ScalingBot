@@ -3,6 +3,7 @@ package yandex
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"scaling-bot/storage"
@@ -100,7 +101,7 @@ func (s *Scaler) GetStatus(credentials storage.Credentials) (string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", errors.New(strconv.Itoa(resp.StatusCode))
 	}
 
 	var target GetResponse
@@ -129,7 +130,7 @@ func (s *Scaler) ApplyAction(credentials storage.Credentials, call storage.Actio
 		}
 	}`
 
-	req, err := http.NewRequest("PATCH", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/"+credentials.CloudId, bytes.NewBuffer([]byte(payload)))
+	req, err := http.NewRequest("PATCH", "https://mks.api.cloud.yandex.net/managed-kubernetes/v1/nodeGroups/" + credentials.CloudId, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		panic(err)
 	}
