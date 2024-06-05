@@ -74,8 +74,8 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 	}
 
 	if isLimit(text) {
-		return p.tg.SendMessage(chatId, ep.Sucess_msg)
-		//return p.setLimit(text, credentials, userName)
+		// amount, _ := strconv.Atoi(text)
+		return p.setLimit(text, credentials, userName)
 	}
 
 	switch text {
@@ -148,32 +148,27 @@ func (p *Processor) getStatus(credentials storage.Credentials) error {
 	return p.tg.SendMessage(credentials.UserId, msg)
 }
 
-// func (p *Processor) setLimit(text string, credentials storage.Credentials, userName string) error {
-// 	amount, _ := strconv.Atoi(text[strings.LastIndex(text, " ")+1:])
-// 	if amount < 1 || amount > 100 {
-// 		return p.tg.SendMessage(credentials.UserId, ep.Impossible_percent_msg)
-// 	}
+func (p *Processor) setLimit(text string, credentials storage.Credentials, userName string) error {
+	amount, _ := strconv.Atoi(text[strings.LastIndex(text, " ")+1:])
+	if amount < 1 || amount > 100 {
+		return p.tg.SendMessage(credentials.UserId, ep.Impossible_percent_msg)
+	}
 
-// 	call := &storage.Action{
-// 		CloudId:    credentials.CloudId,
-// 		Type:      2,
-// 		Amount:    amount,
-// 		UserName:  userName,
-// 		CreatedAt: time.Now(),
-// 	}
+	call := &storage.Action{
+		CloudId:    credentials.CloudId,
+		Type:      2,
+		Amount:    amount,
+		UserName:  userName,
+		CreatedAt: time.Now(),
+	}
 
-// 	if err := p.ApplyLimit(credentials); err != nil {
-// 		_ = p.tg.SendMessage(credentials.UserId, unable_to_scale)
-// 		return e.WrapErr("can't apply call", err)
-// 	}
+	if err := p.storage.SaveAction(call); err != nil {
+		_ = p.tg.SendMessage(credentials.UserId, ep.Fail_msg)
+		return err
+	}
 
-// 	if err := p.storage.Save(call); err != nil {
-// 		_ = p.tg.SendMessage(credentials.UserId, fail_msg)
-// 		return e.WrapErr("can't run cmd /add", err)
-// 	}
-
-// 	return p.tg.SendMessage(credentials.UserId, sucess_msg)
-// }
+	return p.tg.SendMessage(credentials.UserId, ep.Sucess_msg)
+}
 
 func (p *Processor) getLast(credentials storage.Credentials, amount int) (string, error) {
 	calls, err := p.storage.GetActions(credentials.CloudId, amount)
