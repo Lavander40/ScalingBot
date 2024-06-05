@@ -80,15 +80,22 @@ func (s *Server) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandleVar(w http.ResponseWriter, r *http.Request) {
-// 	body, err := io.ReadAll(r.Body)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-// 	defer r.Body.Close()
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var jsonReq CloudRequest
+	if err := json.Unmarshal(body, &jsonReq); err != nil {
+		log.Fatal(err)
+	}
+
+	limit := s.storage.GetLastlimit(jsonReq.Title)
 
 	resp := Response{
-		Limit: 0.5,
+		Limit: limit,
 	}
 	json.NewEncoder(w).Encode(resp)
 }

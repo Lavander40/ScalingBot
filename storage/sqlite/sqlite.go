@@ -126,3 +126,16 @@ func (s Storage) GetUserByCloud(cloudId string) ([]int, error) {
 
 	return users, nil
 }
+
+func (s Storage) GetLastlimit(cloudId string) float32 {
+	var limit float32
+
+	q := `SELECT amount FROM calls WHERE cloud_id = ? and type = 2 ORDER BY created_at ASC LIMIT ?`
+
+	err := s.db.QueryRowContext(s.ctx, q, cloudId).Scan(&limit)
+	if err != nil {
+		return float32(0.5)
+	}
+
+	return limit
+}

@@ -21,6 +21,7 @@ type Storage interface {
 	SetCred(Credentials) error
 	GetCred(int) (Credentials, error) // user_id
 	GetUserByCloud(string) ([]int, error)
+	GetLastlimit(string) (float32)
 }
 
 type Action struct {
