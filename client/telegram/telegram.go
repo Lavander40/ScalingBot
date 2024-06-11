@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -19,7 +20,6 @@ type Client struct {
 	host     string
 	basePath string
 	client   http.Client
-	lastMessageId int
 }
 
 func New(host string, token string) *Client {
@@ -69,6 +69,8 @@ func (c *Client) DeleteMessage(chatId int, messageId int) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatId))
 	q.Add("message_id", strconv.Itoa(messageId))
+
+	fmt.Println(messageId)
 
 	_, err := c.doRequest(q, deleteMessageMethod)
 	if err != nil {

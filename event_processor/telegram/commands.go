@@ -26,7 +26,7 @@ const (
 func (p *Processor) doCmd(text string, chatId int, userName string, messageId int) error {
 	text = strings.TrimSpace(text)
 
-	log.Printf("run commant %s, by %s", text, userName)
+	log.Printf("run commant %s, by %s\nmessage id: %d", text, userName, messageId)
 
 	if isConfig(text) {
 		conf := strings.Split(text[strings.LastIndex(text, " ") + 1 :], ":")
