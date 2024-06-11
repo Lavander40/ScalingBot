@@ -23,7 +23,7 @@ const (
 	StatusCmd = "/status"
 )
 
-func (p *Processor) doCmd(text string, chatId int, userName string) error {
+func (p *Processor) doCmd(text string, chatId int, userName string, messageId int) error {
 	text = strings.TrimSpace(text)
 
 	log.Printf("run commant %s, by %s", text, userName)
@@ -45,6 +45,9 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 		if err != nil {
 			return err
 		}
+
+		_ = p.tg.DeleteMessage(chatId, messageId)
+		
 		return p.tg.SendMessage(chatId, "Соединение успешно установлено")
 	}
 
@@ -74,7 +77,6 @@ func (p *Processor) doCmd(text string, chatId int, userName string) error {
 	}
 
 	if isLimit(text) {
-		// amount, _ := strconv.Atoi(text)
 		return p.setLimit(text, credentials, userName)
 	}
 

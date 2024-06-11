@@ -64,7 +64,7 @@ func (p *Processor) processMessage(event ep.Event) error {
 	if err != nil {
 		return err
 	}
-	if err := p.doCmd(event.Text, meta.ChatId, meta.Username); err != nil {
+	if err := p.doCmd(event.Text, meta.ChatId, meta.Username, event.MessageId); err != nil {
 		return err
 	}
 

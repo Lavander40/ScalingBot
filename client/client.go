@@ -4,5 +4,6 @@ package client
 type Client interface {
 	Updates(int, int) ([]interface{}, error)
 	SendMessage(int, string) error // user_id, msg
+	DeleteMessage(int, int) error
 	//doRequest(url.Values, string) ([]byte, error)  // values method
 }

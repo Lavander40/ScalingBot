@@ -10,14 +10,16 @@ import (
 )
 
 const (
-	getUpdateMethod   = "getUpdates"
-	sendMessageMethod = "sendMessage"
+	getUpdateMethod     = "getUpdates"
+	sendMessageMethod   = "sendMessage"
+	deleteMessageMethod = "deleteMessage"
 )
 
 type Client struct {
 	host     string
 	basePath string
 	client   http.Client
+	lastMessageId int
 }
 
 func New(host string, token string) *Client {
@@ -56,6 +58,19 @@ func (c *Client) SendMessage(chatId int, text string) error {
 	q.Add("text", text)
 
 	_, err := c.doRequest(q, sendMessageMethod)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteMessage(chatId int, messageId int) error {
+	q := url.Values{}
+	q.Add("chat_id", strconv.Itoa(chatId))
+	q.Add("message_id", strconv.Itoa(messageId))
+
+	_, err := c.doRequest(q, deleteMessageMethod)
 	if err != nil {
 		return err
 	}
