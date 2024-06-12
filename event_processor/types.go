@@ -10,7 +10,6 @@ const (
 type Event struct {
 	Type Type
 	Text string
-	MessageId int
 	Meta interface{}
 }
 

@@ -18,6 +18,7 @@ type Processor struct {
 type Meta struct {
 	ChatId   int
 	Username string
+	MessageId int
 }
 
 func New(client *telegram.Client, storage storage.Storage, scaler scaler.Scaler) *Processor {
@@ -64,7 +65,7 @@ func (p *Processor) processMessage(event ep.Event) error {
 	if err != nil {
 		return err
 	}
-	if err := p.doCmd(event.Text, meta.ChatId, meta.Username, event.MessageId); err != nil {
+	if err := p.doCmd(event.Text, meta.ChatId, meta.Username, meta.MessageId); err != nil {
 		return err
 	}
 
@@ -86,13 +87,13 @@ func event(update telegram.Update) ep.Event {
 	res := ep.Event{
 		Type: uType,
 		Text: fetchText(update),
-		MessageId: update.Message.MessageId,
 	}
 
 	if uType == ep.Message {
 		res.Meta = Meta{
 			ChatId:   update.Message.Chat.Id,
 			Username: update.Message.From.Username,
+			MessageId: update.Message.MessageId,
 		}
 	}
 
