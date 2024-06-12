@@ -39,7 +39,7 @@ func (c *Client) Updates(offset int, limit int) ([]Update, error) {
 	q.Add("offset", strconv.Itoa(offset))
 	q.Add("limit", strconv.Itoa(limit))
 
-	data, err := c.doRequest(q, getUpdateMethod)
+	data, err := c.doRequest(q, getUpdateMethod, http.MethodGet)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *Client) SendMessage(chatId int, text string) error {
 	q.Add("chat_id", strconv.Itoa(chatId))
 	q.Add("text", text)
 
-	_, err := c.doRequest(q, sendMessageMethod)
+	_, err := c.doRequest(q, sendMessageMethod, http.MethodGet)
 	if err != nil {
 		return err
 	}
@@ -70,9 +70,7 @@ func (c *Client) DeleteMessage(chatId int, messageId int) error {
 	q.Add("chat_id", strconv.Itoa(chatId))
 	q.Add("message_id", strconv.Itoa(messageId))
 
-	fmt.Println(messageId)
-
-	_, err := c.doRequest(q, deleteMessageMethod)
+	_, err := c.doRequest(q, deleteMessageMethod, http.MethodPost)
 	if err != nil {
 		return err
 	}
@@ -80,14 +78,14 @@ func (c *Client) DeleteMessage(chatId int, messageId int) error {
 	return nil
 }
 
-func (c *Client) doRequest(query url.Values, method string) ([]byte, error) {
+func (c *Client) doRequest(query url.Values, tgMethod string, httpMethod string) ([]byte, error) {
 	u := url.URL{
 		Scheme: "https",
 		Host:   c.host,
-		Path:   path.Join(c.basePath, method),
+		Path:   path.Join(c.basePath, tgMethod),
 	}
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	req, err := http.NewRequest(httpMethod, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
