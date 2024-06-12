@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+	"time"
 )
 
 const (
@@ -69,6 +70,7 @@ func (c *Client) DeleteMessage(chatId int, messageId int) error {
 	q.Add("chat_id", strconv.Itoa(chatId))
 	q.Add("message_id", strconv.Itoa(messageId))
 
+	time.Sleep(10 * time.Second)
 	_, err := c.doRequest(q, deleteMessageMethod, http.MethodPost)
 	if err != nil {
 		return err
