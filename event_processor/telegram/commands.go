@@ -46,9 +46,9 @@ func (p *Processor) doCmd(text string, chatId int, userName string, messageId in
 			return err
 		}
 
-		_ = p.tg.DeleteMessage(chatId, messageId)
+		_ = p.tg.SendMessage(chatId, ep.Connect_msg)
 		
-		return p.tg.SendMessage(chatId, ep.Connect_msg)
+		return p.tg.DeleteMessage(chatId, messageId)
 	}
 
 	switch text {
