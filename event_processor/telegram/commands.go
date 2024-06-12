@@ -26,7 +26,7 @@ const (
 func (p *Processor) doCmd(text string, chatId int, userName string, messageId int) error {
 	text = strings.TrimSpace(text)
 
-	log.Printf("run commant %s, by %s\nmessage id: %d", text, userName, messageId)
+	log.Printf("run commant %s, by %s", text, userName)
 
 	if isConfig(text) {
 		conf := strings.Split(text[strings.LastIndex(text, " ") + 1 :], ":")
@@ -48,7 +48,7 @@ func (p *Processor) doCmd(text string, chatId int, userName string, messageId in
 
 		_ = p.tg.DeleteMessage(chatId, messageId)
 		
-		return p.tg.SendMessage(chatId, "Соединение успешно установлено")
+		return p.tg.SendMessage(chatId, ep.Connect_msg)
 	}
 
 	switch text {
