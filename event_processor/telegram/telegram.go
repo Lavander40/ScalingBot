@@ -86,6 +86,7 @@ func event(update telegram.Update) ep.Event {
 	res := ep.Event{
 		Type: uType,
 		Text: fetchText(update),
+		MessageId: update.Message.MessageId,
 	}
 
 	if uType == ep.Message {
